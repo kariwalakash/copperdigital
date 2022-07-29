@@ -12,7 +12,15 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/', view('login'));
+Route::get('/admin', view('admin'));
 
-Route::get('/', function () {
-    return view('welcome');
+Route::middleware('throttle:60,1')->group(function () {
+    Route::middleware(['user'])->post('/login', 'UserController@login');
 });
+
+Route::middleware(['admin'])->post('generateToken', 'AdminController@generateToken');
+Route::middleware(['admin'])->post('revokeToken', 'AdminController@revokeToken');
+Route::middleware(['admin'])->get('seeAllTokens', 'AdminController@seeAllTokens');
+
+Route::get('validateToken', 'UserController@validateToken');
