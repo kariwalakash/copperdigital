@@ -19,8 +19,8 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::middleware(['App\Http\Middleware\user'])->post('/login', 'App\Http\Controllers\UserController@login');
 });
 
-Route::middleware(['admin'])->post('generateToken', 'AdminController@generateToken');
-Route::middleware(['admin'])->post('revokeToken', 'AdminController@revokeToken');
-Route::middleware(['admin'])->get('seeAllTokens', 'AdminController@seeAllTokens');
+Route::middleware(['App\Http\Middleware\admin'])->post('generateToken', 'App\Http\Controllers\AdminController@generateToken');
+Route::middleware(['App\Http\Middleware\admin'])->post('revokeToken', 'App\Http\Controllers\AdminController@revokeToken');
+Route::middleware(['App\Http\Middleware\admin'])->get('seeAllTokens', 'App\Http\Controllers\AdminController@seeAllTokens');
 
-Route::get('validateToken', 'UserController@validateToken');
+Route::post('validateToken', 'App\Http\Controllers\UserController@validateToken');

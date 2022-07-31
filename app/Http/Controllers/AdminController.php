@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Token;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Http\Helpers\Utility;
 
 class AdminController extends Controller {
     public function generateToken (Request $request) {
@@ -13,7 +14,7 @@ class AdminController extends Controller {
             return response()->json(['success' => 'false', 'message' => 'invalid token length']);
 
         $dbToken = new Token();
-        $dbToken->token = \Utility::generateRandomCharacters($length);
+        $dbToken->token = Utility::generateRandomCharacters($length);
         $expiresAt = $request->get('validity');
 
         if ( $expiresAt > 0 )
@@ -23,14 +24,16 @@ class AdminController extends Controller {
 
         $dbToken->save();
 
-        return response()->json(['success' => 'true', 'data' => $dbToken]);
+        return response()->json(['success' => 'true', 'data' => [
+            'token' => $dbToken->token,
+            'expires_at' => $dbToken->expires_at]]);
 
 
     }
 
     public function revokeToken (Request $request) {
         $token = $request->token;
-        $dbToken = Token::where('token', $token)->where('expires_at', '<', Carbon::now())->first();
+        $dbToken = Token::where('token', $token)->where('expires_at', '>', Carbon::now())->first();
 
         if ( !isset($dbToken->id) )
             return response()->json(['message' => 'invalid token']);
@@ -42,7 +45,6 @@ class AdminController extends Controller {
     }
 
     public function seeAllTokens (Request $request) {
-
         $dbTokens = Token::get();
         $respData = [];
         foreach ( $dbTokens as $token ) {
