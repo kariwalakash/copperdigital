@@ -17,10 +17,10 @@ class user {
      */
     public function handle (Request $request, Closure $next) {
         if ( !isset($request->token) )
-            return response()->json(['message' => 'unauthethicated']);
+            return response()->json(['message' => 'unauthenticated']);
 
         $token = $request->token;
-        $dbToken = Token::where('token_data', $token)->where('expires_at', '<', Carbon::now())->first();
+        $dbToken = Token::where('token', $token)->where('expires_at', '>', Carbon::now())->first();
         if (!isset($dbToken->id))
             return response()->json(['message' => 'invalid token']);
 

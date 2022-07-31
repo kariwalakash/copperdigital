@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::get('/', view('login'));
-Route::get('/admin', view('admin'));
+Route::get('/', function () {return view('login');});
+Route::get('/admin', function () {return view('admin');});
 
 Route::middleware('throttle:60,1')->group(function () {
-    Route::middleware(['user'])->post('/login', 'UserController@login');
+    Route::middleware(['App\Http\Middleware\user'])->post('/login', 'App\Http\Controllers\UserController@login');
 });
 
 Route::middleware(['admin'])->post('generateToken', 'AdminController@generateToken');

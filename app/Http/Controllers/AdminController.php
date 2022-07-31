@@ -10,10 +10,10 @@ class AdminController extends Controller {
     public function generateToken (Request $request) {
         $length = $request->get('length');
         if ( $length < 8 || $length > 24 )
-            return;
+            return response()->json(['success' => 'false', 'message' => 'invalid token length']);
 
         $dbToken = new Token();
-        $dbToken->token_data = \Utility::generateRandomCharacters($length);
+        $dbToken->token = \Utility::generateRandomCharacters($length);
         $expiresAt = $request->get('validity');
 
         if ( $expiresAt > 0 )
@@ -23,14 +23,14 @@ class AdminController extends Controller {
 
         $dbToken->save();
 
-        return [];
+        return response()->json(['success' => 'true', 'data' => $dbToken]);
 
 
     }
 
     public function revokeToken (Request $request) {
         $token = $request->token;
-        $dbToken = Token::where('token_data', $token)->where('expires_at', '<', Carbon::now())->first();
+        $dbToken = Token::where('token', $token)->where('expires_at', '<', Carbon::now())->first();
 
         if ( !isset($dbToken->id) )
             return response()->json(['message' => 'invalid token']);
@@ -38,18 +38,26 @@ class AdminController extends Controller {
         $dbToken->expires_at = Carbon::now();
         $dbToken->save();
 
-        return [];
+        return response()->json(['success' => 'true']);
     }
 
     public function seeAllTokens (Request $request) {
-        $token = $request->token;
+
         $dbTokens = Token::get();
         $respData = [];
         foreach ( $dbTokens as $token ) {
 
+            $data = [
+                'token' => $token->token,
+                'expires_at' => $token->expires_at,
+                'validity' => ($token->expires_at > Carbon::now()) ? 'active' : 'inactive'
+            ];
+
+            $respData[] = $data;
         }
 
-        return response()->json(['message' => 'invalid token']);
+        return response()->json(['success' => 'true', 'data' => $respData]);
+
     }
 
 
